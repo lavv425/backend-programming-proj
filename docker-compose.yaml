@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: booker_db
+      POSTGRES_USER: booker_user
+      POSTGRES_PASSWORD: booker_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql
+    networks:
+      - booker-net
+
+  backend:
+    build: ./backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: booker_db
+      DB_USER: booker_user
+      DB_PASSWORD: booker_pass
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - booker-net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - booker-net
+
+volumes:
+  db_data:
+
+networks:
+  booker-net:
