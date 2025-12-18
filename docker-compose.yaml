@@ -13,7 +13,11 @@ services:
       - booker-net
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: booker-backend
+    restart: unless-stopped
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -22,15 +26,36 @@ services:
       DB_PASSWORD: booker_pass
     ports:
       - "8080:8080"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend/pom.xml
+        - action: rebuild
+          path: ./backend/src
     depends_on:
       - db
     networks:
       - booker-net
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: booker-frontend
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
     depends_on:
       - backend
     networks:
