@@ -14,4 +14,5 @@ public class ErrorCodes {
     public static final String DUPLICATE_RESOURCE = "DUPLICATE_RESOURCE";
     public static final String VALIDATION_FAILED = "VALIDATION_FAILED";
     public static final String RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED";
+    public static final String SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE";
 }
