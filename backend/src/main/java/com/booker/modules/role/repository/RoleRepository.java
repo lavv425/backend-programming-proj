@@ -9,7 +9,5 @@ import com.booker.modules.role.entity.Role;
 
 public interface RoleRepository extends JpaRepository<Role, UUID>{
     Optional<Role> findByRoleName(String roleName);
-    boolean existsByRoleName(String roleName);
-    Optional<Role> findById(UUID id);
-    boolean existsById(UUID id);
+    Boolean existsByRoleName(String roleName);
 }

@@ -51,7 +51,7 @@ public class AuthService {
 
         User saved = userRepository.save(u);
 
-        RegisterResponse dto = new RegisterResponse(
+        RegisterResponse responseDto = new RegisterResponse(
                 saved.getId(),
                 saved.getEmail(),
                 saved.getFirstName(),
@@ -59,6 +59,6 @@ public class AuthService {
                 saved.getRole()
             );
 
-        return new Response<RegisterResponse>(true, dto, SuccessCodes.USER_REGISTERED);
+        return new Response<RegisterResponse>(true, responseDto, SuccessCodes.USER_REGISTERED);
     }
 }

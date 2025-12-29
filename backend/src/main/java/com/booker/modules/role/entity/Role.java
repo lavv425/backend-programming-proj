@@ -2,6 +2,7 @@ package com.booker.modules.role.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "roles", uniqueConstraints = @UniqueConstraint(name = "uk_roles_role_name", columnNames = "role_name"), indexes = @Index(name = "idx_roles_role_name", columnList = "role_name"))
@@ -13,7 +14,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private java.util.UUID id;
+    private UUID id;
 
     @Column(name = "role_name", length = 50, nullable = false)
     private String roleName;
@@ -27,7 +28,7 @@ public class Role {
     }
 
     // getters/setters
-    public java.util.UUID getId() {
+    public UUID getId() {
         return id;
     }
 

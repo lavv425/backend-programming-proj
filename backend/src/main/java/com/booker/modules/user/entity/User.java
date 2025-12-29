@@ -11,7 +11,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private java.util.UUID id;
+    private UUID id;
 
     @Column(nullable = false)
     private String email;
