@@ -1,4 +1,4 @@
-package com.booker.modules.auth.dto;
+package com.booker.modules.auth.dto.register;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

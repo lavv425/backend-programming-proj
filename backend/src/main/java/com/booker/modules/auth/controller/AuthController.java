@@ -6,8 +6,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.booker.constants.routes.Namespaces;
 import com.booker.constants.routes.Routes;
-import com.booker.modules.auth.dto.RegisterRequest;
-import com.booker.modules.auth.dto.RegisterResponse;
+import com.booker.modules.auth.dto.login.LoginRequest;
+import com.booker.modules.auth.dto.register.RegisterRequest;
+import com.booker.modules.auth.dto.register.RegisterResponse;
 import com.booker.modules.auth.service.AuthService;
 import com.booker.utils.base.Response;
 
@@ -25,5 +26,11 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public Response<RegisterResponse> register(@Valid @RequestBody RegisterRequest req) {
         return authService.register(req);
+    }
+
+    @PostMapping(Routes.LOGIN)
+    @ResponseStatus(HttpStatus.OK)
+    public Response<?> login(@Valid @RequestBody LoginRequest req) {
+        return authService.login(req);
     }
 }
