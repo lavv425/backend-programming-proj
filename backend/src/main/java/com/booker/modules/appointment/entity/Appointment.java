@@ -6,9 +6,12 @@ import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "appointment", indexes = @Index(name = "idx_appointment_email", columnList = "id"))
+@Table(name = "appointment", indexes = {
+        @Index(name = "idx_appointment_customer", columnList = "customer_uuid"),
+        @Index(name = "idx_appointment_professional", columnList = "professional_uuid"),
+        @Index(name = "idx_appointment_service", columnList = "service_uuid") })
 public class Appointment {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
