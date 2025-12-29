@@ -1,5 +1,6 @@
 package com.booker.security;
 
+import org.springframework.security.config.Customizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,7 +29,10 @@ public class SecurityConfig {
 
             // no web login and basic auth
             .httpBasic(basic -> basic.disable())
-            .formLogin(form -> form.disable());
+            .formLogin(form -> form.disable())
+
+            // Bearer token (JWT)
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return http.build();
     }
