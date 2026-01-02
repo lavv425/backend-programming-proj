@@ -24,6 +24,7 @@ services:
       DB_NAME: booker_db
       DB_USER: booker_user
       DB_PASSWORD: booker_pass
+      JWT_SECRET: ${JWT_SECRET:-change-me-please-change-me-please-32bytes}
     ports:
       - "8080:8080"
     develop:
@@ -34,30 +35,6 @@ services:
           path: ./backend/src
     depends_on:
       - db
-    networks:
-      - booker-net
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: booker-frontend
-    restart: unless-stopped
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend
-          target: /app
-          ignore:
-            - node_modules/
-            - dist/
-    depends_on:
-      - backend
     networks:
       - booker-net
 
