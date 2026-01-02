@@ -1,0 +1,14 @@
+FROM maven:latest
+WORKDIR /app
+
+# Copia pom.xml e scarica le dipendenze
+COPY pom.xml .
+RUN mvn -q -e -B dependency:go-offline
+
+# Copia il codice sorgente
+COPY src ./src
+
+EXPOSE 8080
+
+# Esegui Spring Boot in modalità dev con hot reload
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-Dspring.devtools.restart.enabled=true"]
