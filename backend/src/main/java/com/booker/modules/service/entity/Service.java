@@ -4,6 +4,11 @@ import java.time.Instant;
 
 import jakarta.persistence.*;
 
+/**
+ * Represents a service offered by a professional.
+ * Each service has a name, description, duration, and price.
+ * Services can be activated or deactivated by the professional.
+ */
 @Entity
 @Table(name = "services", uniqueConstraints = @UniqueConstraint(name = "uk_services_name", columnNames = "name"), indexes = @Index(name = "idx_services_name", columnList = "name"))
 public class Service {
@@ -24,8 +29,7 @@ public class Service {
     @Column(nullable = false, columnDefinition = "DECIMAL(10,2) DEFAULT 0.00")
     private Double price;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professional_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_services_professional"))
+    @Column(name = "professional_uuid", nullable = false)
     private java.util.UUID professional;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE", nullable = false)
