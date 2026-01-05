@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import com.booker.modules.user.entity.User;
 
+/**
+ * Represents a professional user who offers services to customers.
+ * Extends the base User class with professional-specific information like bio,
+ * years of experience, verification status, and average rating.
+ */
 @Entity
 @Table(name = "professionals", uniqueConstraints = @UniqueConstraint(name = "uk_professionals_phone", columnNames = "phone_number"), indexes = @Index(name = "idx_professionals_phone", columnList = "phone_number"))
 public class Professional extends User {
@@ -12,7 +17,7 @@ public class Professional extends User {
     private String bio;
     
     @Column(name = "experience", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private String yearsOfExperience;
+    private Integer yearsOfExperience;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isVerified;
@@ -26,7 +31,7 @@ public class Professional extends User {
         return bio;
     }
 
-    public String getYearsOfExperience() {
+    public Integer getYearsOfExperience() {
         return yearsOfExperience;
     }
 
@@ -42,7 +47,7 @@ public class Professional extends User {
         this.bio = bio;
     }
 
-    public void setYearsOfExperience(String yearsOfExperience) {
+    public void setYearsOfExperience(Integer yearsOfExperience) {
         this.yearsOfExperience = yearsOfExperience;
     }
 

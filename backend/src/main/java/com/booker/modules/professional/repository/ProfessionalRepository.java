@@ -10,5 +10,5 @@ import com.booker.modules.professional.entity.Professional;
 public interface ProfessionalRepository extends JpaRepository<Professional, UUID> {
     List<Professional> findByIsVerifiedTrue();
     List<Professional> findByAverageRatingGreaterThan(Integer average);
-    List<Professional> findByYearsOfExperienceGreaterThanEqual(String years);
+    List<Professional> findByYearsOfExperienceGreaterThanEqual(Integer years);
 }
