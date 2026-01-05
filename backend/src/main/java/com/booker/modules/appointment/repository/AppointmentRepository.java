@@ -10,20 +10,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.booker.modules.appointment.entity.Appointment;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
-    List<Appointment> findByServiceId(UUID id);
-    List<Appointment> findByProfessionalId(UUID professionalId);
-    List<Appointment> findByCustomerId(UUID customerId);
-    Optional<Appointment> findByIdAndCustomerId(UUID appointmentId, UUID customerId);
+    List<Appointment> findByService(UUID service);
+    List<Appointment> findByProfessional(UUID professional);
+    List<Appointment> findByCustomer(UUID customer);
+    Optional<Appointment> findByIdAndCustomer(UUID appointmentId, UUID customer);
     List<Appointment> findByStatus(String status);
     List<Appointment> findByStartTimeBetween(Instant start, Instant end);
-    List<Appointment> findByProfessionalIdAndStartTimeBetween(UUID professionalId, Instant start, Instant end);
-    List<Appointment> findByCustomerIdAndStartTimeBetween(UUID customerId, Instant start, Instant end);
-    List<Appointment> findByServiceIdAndStartTimeBetween(UUID serviceId, Instant start, Instant end);
-    List<Appointment> findByProfessionalIdAndStatus(UUID professionalId, String status);
-    List<Appointment> findByCustomerIdAndStatus(UUID customerId, String status);
-    List<Appointment> findByServiceIdAndStatus(UUID serviceId, String status);
-    List<Appointment> orderByStartTimeAsc(Instant start);
-    List<Appointment> orderByStartTimeDesc(Instant start);
-    List<Appointment> orderByEndTimeAsc(Instant end);
-    List<Appointment> orderByEndTimeDesc(Instant end);
+    List<Appointment> findByProfessionalAndStartTimeBetween(UUID professional, Instant start, Instant end);
+    List<Appointment> findByCustomerAndStartTimeBetween(UUID customer, Instant start, Instant end);
+    List<Appointment> findByServiceAndStartTimeBetween(UUID service, Instant start, Instant end);
+    List<Appointment> findByProfessionalAndStatus(UUID professional, String status);
+    List<Appointment> findByCustomerAndStatus(UUID customer, String status);
+    List<Appointment> findByServiceAndStatus(UUID service, String status);
+    List<Appointment> findAllByOrderByStartTimeAsc();
+    List<Appointment> findAllByOrderByStartTimeDesc();
+    List<Appointment> findAllByOrderByEndTimeAsc();
+    List<Appointment> findAllByOrderByEndTimeDesc();
 }

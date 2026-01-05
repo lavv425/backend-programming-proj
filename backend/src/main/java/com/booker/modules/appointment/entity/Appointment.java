@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents a scheduled appointment between a customer and a professional.
+ * Each appointment has a specific time slot, links to the service being provided,
+ * and tracks its current status (pending, confirmed, cancelled, etc.).
+ */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "appointment", indexes = {
@@ -25,19 +30,13 @@ public class Appointment {
     @Column(nullable = false)
     private String status;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_appointment_customer"))
+    @Column(name = "customer_uuid", nullable = false)
     private UUID customer;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professional_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_appointment_professional"))
+    @Column(name = "professional_uuid", nullable = false)
     private UUID professional;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_appointment_service"))
+    @Column(name = "service_uuid", nullable = false)
     private UUID service;
 
     @Column(nullable = false, updatable = false)
