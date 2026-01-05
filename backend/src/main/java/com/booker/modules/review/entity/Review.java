@@ -5,6 +5,11 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents a customer review for a professional after an appointment.
+ * Reviews include a rating (typically 1-5 stars) and optional written feedback.
+ * Each review is linked to a specific appointment.
+ */
 @Entity
 @Table(name = "reviews")
 public class Review {
@@ -19,19 +24,13 @@ public class Review {
     @Column(length = 2000)
     private String comment;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_review_customer"))
+    @Column(name = "customer_uuid", nullable = false)
     private UUID customer;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professional_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_review_professional"))
+    @Column(name = "professional_uuid", nullable = false)
     private UUID professional;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_review_appointment"))
+    @Column(name = "appointment_uuid", nullable = false)
     private UUID appointment;
 
     @Column(nullable = false, updatable = false)

@@ -13,10 +13,10 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     List<Review> findByCustomer(UUID customerId);
     List<Review> findByAppointment(UUID appointmentId);
     List<Review> findByRating(Integer rating);
-    Optional<Review> findByIdAndCustomerId(UUID reviewId, UUID customerId);
+    Optional<Review> findByIdAndCustomer(UUID reviewId, UUID customerId);
     List<Review> findByCommentContaining(String keyword);
-    List<Review> orderByCreatedAtAsc();
-    List<Review> orderByCreatedAtDesc();
-    List<Review> orderByRatingAsc();
-    List<Review> orderByRatingDesc();
+    List<Review> findAllByOrderByCreatedAtAsc();
+    List<Review> findAllByOrderByCreatedAtDesc();
+    List<Review> findAllByOrderByRatingAsc();
+    List<Review> findAllByOrderByRatingDesc();
 }
