@@ -106,7 +106,12 @@ public class UserService {
             return new Response<>(false, null, ErrorCodes.INVALID_REQUEST_DATA);
         }
 
-        // Elimina vecchio avatar se presente
+        // Only allow image files
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return new Response<>(false, null, ErrorCodes.INVALID_REQUEST_DATA);
+        }
+
         if (user.getProfileImageUrl() != null) {
             String oldObjectName = minioService.extractObjectName(user.getProfileImageUrl());
             if (oldObjectName != null) {
@@ -114,7 +119,6 @@ public class UserService {
             }
         }
 
-        // Upload nuovo avatar
         try {
             String publicUrl = minioService.uploadFile(file, user.getId());
             user.setProfileImageUrl(publicUrl);
@@ -140,7 +144,6 @@ public class UserService {
             return new Response<>(false, null, ErrorCodes.USER_NOT_FOUND);
         }
 
-        // Elimina file da MinIO se presente
         if (user.getProfileImageUrl() != null) {
             String objectName = minioService.extractObjectName(user.getProfileImageUrl());
             if (objectName != null) {
