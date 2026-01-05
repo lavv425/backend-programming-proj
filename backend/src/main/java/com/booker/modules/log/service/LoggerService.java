@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.booker.modules.enums.log.LogType;
 import com.booker.modules.log.entity.Log;
 import com.booker.modules.log.repository.LogRepository;
+import com.booker.modules.log.config.LoggingProperties;
 
 /**
  * Custom logging service that outputs colored logs to the CLI and persists them to the database.
@@ -24,9 +25,11 @@ public class LoggerService {
     private static final String BOLD = "\u001B[1m";
 
     private final LogRepository logRepository;
+    private final LoggingProperties loggingProperties;
 
-    public LoggerService(LogRepository logRepository) {
+    public LoggerService(LogRepository logRepository, LoggingProperties loggingProperties) {
         this.logRepository = logRepository;
+        this.loggingProperties = loggingProperties;
     }
 
     /**
@@ -47,6 +50,11 @@ public class LoggerService {
      * @param source optional source identifier (e.g., class name or component)
      */
     public void log(LogType type, String message, String source) {
+        // Check if this log type is enabled
+        if (!loggingProperties.isEnabled(type)) {
+            return;
+        }
+
         // Print colored log to CLI
         printColoredLog(type, message, source);
 

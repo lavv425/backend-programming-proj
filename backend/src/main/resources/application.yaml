@@ -2,6 +2,11 @@ spring:
   application:
     name: booker-service
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:booker_db}
     username: ${DB_USER:booker_user}
@@ -10,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # 'validate' in prod
+      ddl-auto: update   # "validate" in prod
     show-sql: true
     properties:
       hibernate:
@@ -24,6 +29,13 @@ server:
 logging:
   level:
     org.springframework.security: DEBUG
+  custom:
+    # Enabled log types: SUCCESS, INFO, WARNING, ERROR, !!!!!!!!!!!!!disable INfo in production!!!!!!!!!!!
+    enabled-types:
+      - SUCCESS
+      - WARNING
+      - ERROR
+      - INFO
 
 security:
   jwt:
