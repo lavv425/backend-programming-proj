@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import com.booker.modules.appointment.repository.AppointmentRepository;
+import com.booker.modules.log.service.LoggerService;
 import com.booker.modules.payment.repository.PaymentRepository;
 import com.booker.modules.review.repository.ReviewRepository;
 import com.booker.modules.service.repository.ServiceRepository;
@@ -22,16 +23,19 @@ public class OwnershipChecker {
     private final ReviewRepository reviewRepository;
     private final PaymentRepository paymentRepository;
     private final ServiceRepository serviceRepository;
+    private final LoggerService loggerService;
 
     public OwnershipChecker(
             AppointmentRepository appointmentRepository,
             ReviewRepository reviewRepository,
             PaymentRepository paymentRepository,
-            ServiceRepository serviceRepository) {
+            ServiceRepository serviceRepository,
+            LoggerService loggerService) {
         this.appointmentRepository = appointmentRepository;
         this.reviewRepository = reviewRepository;
         this.paymentRepository = paymentRepository;
         this.serviceRepository = serviceRepository;
+        this.loggerService = loggerService;
     }
 
     /**
@@ -111,6 +115,7 @@ public class OwnershipChecker {
             String subject = jwt.getSubject();
             return UUID.fromString(subject);
         } catch (Exception e) {
+            loggerService.error("Failed to extract userId from JWT: " + e.getMessage(), "OwnershipChecker");
             return null;
         }
     }
