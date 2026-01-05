@@ -13,6 +13,8 @@ import com.booker.modules.role.repository.RoleRepository;
 import com.booker.security.jwt.JwtProperties;
 import com.booker.modules.user.entity.User;
 import com.booker.modules.user.repository.UserRepository;
+import com.booker.services.EmailService;
+import com.booker.modules.log.service.LoggerService;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -25,6 +27,13 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Handles user authentication and registration operations.
+ * 
+ * This service manages the core authentication flow including user registration,
+ * login with JWT token generation, and password hashing. It integrates with the
+ * email service to send confirmation emails upon successful registration.
+ */
 @Service
 public class AuthService {
 
@@ -32,82 +41,130 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final JwtEncoder jwtEncoder;
     private final JwtProperties jwtProperties;
+    private final EmailService emailService;
+    private final LoggerService loggerService;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public AuthService(
             UserRepository userRepository,
             RoleRepository roleRepository,
             JwtEncoder jwtEncoder,
-            JwtProperties jwtProperties) {
+            JwtProperties jwtProperties,
+            EmailService emailService,
+            LoggerService loggerService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jwtEncoder = jwtEncoder;
         this.jwtProperties = jwtProperties;
+        this.emailService = emailService;
+        this.loggerService = loggerService;
     }
 
+    /**
+     * Registers a new user in the system.
+     * 
+     * Creates a new customer account with the provided information, hashing the password
+     * securely. Upon successful registration, sends a confirmation email to the user.
+     * The user is automatically assigned the CUSTOMER role.
+     * 
+     * @param req the registration request containing email, password, and user details
+     * @return a response containing the newly created user data or an error code if registration fails
+     */
     public Response<RegisterResponse> register(RegisterRequest req) {
-        System.err.println("Registering user with email: " + req.email);
-        if (userRepository.existsByEmail(req.email)) {
-            // TODO: Create error handler
-            throw new IllegalArgumentException(ErrorCodes.EMAIL_ALREADY_EXISTS);
+        if (userRepository.existsByEmail(req.email.toLowerCase().trim())) {
+            return new Response<>(false, null, ErrorCodes.EMAIL_ALREADY_EXISTS);
         }
 
         Optional<Role> userRole = roleRepository.findByRoleName(UserRole.CUSTOMER.name());
 
         if (userRole.isEmpty()) {
-            // we throw a "generic" exception if the role is not found
-            throw new IllegalStateException(ErrorCodes.SERVICE_UNAVAILABLE);
+            return new Response<>(false, null, ErrorCodes.SERVICE_UNAVAILABLE);
         }
 
-        User u = new User();
-        u.setEmail(req.email.toLowerCase().trim());
-        u.setPasswordHash(encoder.encode(req.password));
-        u.setFirstName(req.firstName.trim());
-        u.setLastName(req.lastName.trim());
-        u.setRole(userRole.get().getId());
+        try {
+            User u = new User();
+            u.setEmail(req.email.toLowerCase().trim());
+            u.setPasswordHash(encoder.encode(req.password));
+            u.setFirstName(req.firstName.trim());
+            u.setLastName(req.lastName.trim());
+            u.setRole(userRole.get().getId());
 
-        User saved = userRepository.save(u);
+            User saved = userRepository.save(u);
 
-        RegisterResponse responseDto = new RegisterResponse(
-                saved.getId(),
-                saved.getEmail(),
-                saved.getFirstName(),
-                saved.getLastName(),
-                saved.getRole());
+            loggerService.success("User registered successfully: " + saved.getEmail(), "AuthService");
 
-        return new Response<RegisterResponse>(true, responseDto, SuccessCodes.USER_REGISTERED);
+            try {
+                emailService.sendRegistrationConfirmation(saved.getEmail(), saved.getFirstName());
+            } catch (Exception emailEx) {
+                // Log email sending failure but do not fail the registration
+                loggerService.error("Failed to send registration email to " + saved.getEmail() + ": " + emailEx.getMessage(), "AuthService");
+            }
+
+            RegisterResponse responseDto = new RegisterResponse(
+                    saved.getId(),
+                    saved.getEmail(),
+                    saved.getFirstName(),
+                    saved.getLastName(),
+                    saved.getRole());
+
+            return new Response<>(true, responseDto, SuccessCodes.USER_REGISTERED);
+        } catch (Exception e) {
+            loggerService.error("User registration failed: " + e.getMessage(), "AuthService");
+            return new Response<>(false, null, ErrorCodes.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    /**
+     * Authenticates a user and generates a JWT access token.
+     * 
+     * Validates the user's credentials by checking the email and comparing the
+     * provided password against the stored hash. If authentication succeeds,
+     * generates a JWT token containing the user's ID, email, and role.
+     * 
+     * @param req the login request containing email and password
+     * @return a response containing the JWT token or an error code if authentication fails
+     */
     public Response<LoginResponse> login(LoginRequest req) {
         Optional<User> userOpt = userRepository.findByEmail(req.email.toLowerCase().trim());
 
         if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException(ErrorCodes.INVALID_CREDENTIALS);
+            return new Response<>(false, null, ErrorCodes.INVALID_CREDENTIALS);
         }
 
         User user = userOpt.get();
 
         if (!encoder.matches(req.password, user.getPasswordHash())) {
-            throw new IllegalArgumentException(ErrorCodes.INVALID_CREDENTIALS);
+            return new Response<>(false, null, ErrorCodes.INVALID_CREDENTIALS);
         }
 
-        Instant now = Instant.now();
+        try {
+            // Get user role name for scope
+            Optional<Role> roleOpt = roleRepository.findById(user.getRole());
+            String roleName = roleOpt.map(Role::getRoleName).orElse(UserRole.CUSTOMER.name());
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer(jwtProperties.issuer())
-                .issuedAt(now)
-                .expiresAt(now.plusSeconds(jwtProperties.expirationSeconds()))
-                .subject(String.valueOf(user.getId()))
-                .claim("email", user.getEmail())
-                .claim("roleId", user.getRole())
-                .build();
+            Instant now = Instant.now();
 
-        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
-        String token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+            JwtClaimsSet claims = JwtClaimsSet.builder()
+                    .issuer(jwtProperties.issuer())
+                    .issuedAt(now)
+                    .expiresAt(now.plusSeconds(jwtProperties.expirationSeconds()))
+                    .subject(String.valueOf(user.getId()))
+                    .claim("email", user.getEmail())
+                    .claim("roleId", user.getRole())
+                    .claim("scope", roleName) // Add roleNsme as scope for authorization
+                    .build();
 
-        LoginResponse responseDto = new LoginResponse(token);
+            JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
+            String token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
 
-        return new Response<LoginResponse>(true, responseDto, SuccessCodes.USER_LOGGED_IN);
+            loggerService.success("User logged in: " + user.getEmail(), "AuthService");
+
+            LoginResponse responseDto = new LoginResponse(token);
+            return new Response<>(true, responseDto, SuccessCodes.USER_LOGGED_IN);
+        } catch (Exception e) {
+            loggerService.error("User login failed: " + e.getMessage(), "AuthService");
+            return new Response<>(false, null, ErrorCodes.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
