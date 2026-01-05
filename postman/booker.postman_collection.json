@@ -1,0 +1,1042 @@
+{
+  "info": {
+    "_postman_id": "fbe21cb3-6774-411b-9e0b-a9125477684b",
+    "name": "Booker API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "token", "value": "" },
+
+    { "key": "email", "value": "user@example.com" },
+    { "key": "password", "value": "password123" },
+    { "key": "firstName", "value": "Mario" },
+    { "key": "lastName", "value": "Rossi" },
+
+    { "key": "userId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "roleId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "customerId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "professionalId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "serviceId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "appointmentId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "paymentId", "value": "00000000-0000-0000-0000-000000000000" },
+    { "key": "reviewId", "value": "00000000-0000-0000-0000-000000000000" },
+    
+    { "key": "adminEmail", "value": "admin@example.com" },
+    { "key": "adminPassword", "value": "admin123" },
+    { "key": "adminToken", "value": "" },
+    { "key": "adminUserId", "value": "" },
+    { "key": "professionalEmail", "value": "pro@example.com" },
+    { "key": "professionalPassword", "value": "pro123" },
+    { "key": "professionalToken", "value": "" },
+    { "key": "professionalUserId", "value": "" },
+    { "key": "customerEmail", "value": "customer@example.com" },
+    { "key": "customerPassword", "value": "customer123" },
+    { "key": "customerToken", "value": "" },
+    { "key": "customerUserId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) pm.collectionVariables.set('userId', json.data.id);",
+                  "  if (json && json.data && json.data.role) pm.collectionVariables.set('roleId', json.data.role);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login (sets token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.token) {",
+                  "    const token = json.data.token;",
+                  "    pm.collectionVariables.set('token', token);",
+                  "    ",
+                  "    // Decode JWT to extract userId from subject",
+                  "    const base64Url = token.split('.')[1];",
+                  "    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');",
+                  "    const payload = JSON.parse(atob(base64));",
+                  "    ",
+                  "    if (payload.sub) {",
+                  "      pm.collectionVariables.set('userId', payload.sub);",
+                  "      console.log('Extracted userId from JWT:', payload.sub);",
+                  "    }",
+                  "  }",
+                  "} catch (e) {",
+                  "  console.error('Failed to extract userId:', e);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('token', '');",
+                  "  pm.collectionVariables.set('userId', '');",
+                  "  console.log('Token cleared after logout');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/auth/logout",
+            "description": "Logs out the user and clears the token from collection variables"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\",\n  \"role\": \"{{roleId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Upload profile image (File)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/users/{{userId}}/profile-image",
+            "description": "Upload actual image file using multipart/form-data. Select a file in the 'file' field to upload to MinIO."
+          }
+        },
+        {
+          "name": "Delete profile image",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}/profile-image"
+          }
+        },
+        {
+          "name": "Delete user",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/customers"
+          }
+        },
+        {
+          "name": "Get customer by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/customers/{{customerId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Professionals",
+      "item": [
+        {
+          "name": "List professionals",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/professionals"
+          }
+        },
+        {
+          "name": "Get professional by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/professionals/{{professionalId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "List roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/roles"
+          }
+        },
+        {
+          "name": "Get role by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/roles/{{roleId}}"
+          }
+        },
+        {
+          "name": "Create role (sets roleId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) pm.collectionVariables.set('roleId', json.data.id);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"CUSTOMER\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/roles"
+          }
+        },
+        {
+          "name": "Update role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"PROFESSIONAL\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/roles/{{roleId}}"
+          }
+        },
+        {
+          "name": "Delete role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/roles/{{roleId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "List services",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/services"
+          }
+        },
+        {
+          "name": "Get service by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/services/{{serviceId}}"
+          }
+        },
+        {
+          "name": "Create service (sets serviceId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) pm.collectionVariables.set('serviceId', json.data.id);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Haircut\",\n  \"description\": \"Standard haircut\",\n  \"durationInMinutes\": 30,\n  \"price\": 25.0,\n  \"professional\": \"{{professionalId}}\",\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/services"
+          }
+        },
+        {
+          "name": "Update service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Haircut\",\n  \"description\": \"Updated description\",\n  \"durationInMinutes\": 30,\n  \"price\": 30.0,\n  \"professional\": \"{{professionalId}}\",\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/services/{{serviceId}}"
+          }
+        },
+        {
+          "name": "Delete service",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/services/{{serviceId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "List appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/appointments"
+          }
+        },
+        {
+          "name": "Get appointment by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}"
+          }
+        },
+        {
+          "name": "Create appointment (sets appointmentId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) pm.collectionVariables.set('appointmentId', json.data.id);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"2025-01-01T10:00:00Z\",\n  \"endTime\": \"2025-01-01T10:30:00Z\",\n  \"status\": \"BOOKED\",\n  \"customer\": \"{{customerId}}\",\n  \"professional\": \"{{professionalId}}\",\n  \"service\": \"{{serviceId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/appointments"
+          }
+        },
+        {
+          "name": "Update appointment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"2025-01-01T11:00:00Z\",\n  \"endTime\": \"2025-01-01T11:30:00Z\",\n  \"status\": \"BOOKED\",\n  \"customer\": \"{{customerId}}\",\n  \"professional\": \"{{professionalId}}\",\n  \"service\": \"{{serviceId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}"
+          }
+        },
+        {
+          "name": "Delete appointment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/appointments/{{appointmentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "List payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "Get payment by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        },
+        {
+          "name": "Create payment (sets paymentId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) pm.collectionVariables.set('paymentId', json.data.id);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 25.0,\n  \"currency\": \"EUR\",\n  \"status\": \"PAID\",\n  \"provider\": \"stripe\",\n  \"appointment\": \"{{appointmentId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "Update payment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 30.0,\n  \"currency\": \"EUR\",\n  \"status\": \"PAID\",\n  \"provider\": \"stripe\",\n  \"appointment\": \"{{appointmentId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        },
+        {
+          "name": "Delete payment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "List reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/reviews"
+          }
+        },
+        {
+          "name": "Get review by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/reviews/{{reviewId}}"
+          }
+        },
+        {
+          "name": "Create review (sets reviewId)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) pm.collectionVariables.set('reviewId', json.data.id);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great!\",\n  \"customer\": \"{{customerId}}\",\n  \"professional\": \"{{professionalId}}\",\n  \"appointment\": \"{{appointmentId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/reviews"
+          }
+        },
+        {
+          "name": "Update review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated comment\",\n  \"customer\": \"{{customerId}}\",\n  \"professional\": \"{{professionalId}}\",\n  \"appointment\": \"{{appointmentId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/reviews/{{reviewId}}"
+          }
+        },
+        {
+          "name": "Delete review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{baseUrl}}/reviews/{{reviewId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Logs (Admin Only)",
+      "item": [
+        {
+          "name": "Test all log types",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/test-logs/all",
+            "description": "Tests all log types (SUCCESS, INFO, WARNING, ERROR). Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Test success log",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/test-logs/success",
+            "description": "Tests SUCCESS log type. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Test info log",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/test-logs/info",
+            "description": "Tests INFO log type. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Test warning log",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/test-logs/warning",
+            "description": "Tests WARNING log type. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Test error log",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/test-logs/error",
+            "description": "Tests ERROR log type. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "RBAC Tests",
+      "item": [
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.token) {",
+                  "    const token = json.data.token;",
+                  "    pm.collectionVariables.set('adminToken', token);",
+                  "    ",
+                  "    // Decode JWT to extract userId",
+                  "    const base64Url = token.split('.')[1];",
+                  "    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');",
+                  "    const payload = JSON.parse(atob(base64));",
+                  "    if (payload.sub) pm.collectionVariables.set('adminUserId', payload.sub);",
+                  "  }",
+                  "  pm.test('Admin login successful', () => pm.response.to.have.status(200));",
+                  "} catch (e) {",
+                  "  pm.test('Login failed: ' + e.message, () => false);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login as Professional",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.token) {",
+                  "    const token = json.data.token;",
+                  "    pm.collectionVariables.set('professionalToken', token);",
+                  "    ",
+                  "    // Decode JWT to extract userId",
+                  "    const base64Url = token.split('.')[1];",
+                  "    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');",
+                  "    const payload = JSON.parse(atob(base64));",
+                  "    if (payload.sub) pm.collectionVariables.set('professionalUserId', payload.sub);",
+                  "  }",
+                  "  pm.test('Professional login successful', () => pm.response.to.have.status(200));",
+                  "} catch (e) {",
+                  "  pm.test('Login failed: ' + e.message, () => false);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{professionalEmail}}\",\n  \"password\": \"{{professionalPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login as Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.token) {",
+                  "    const token = json.data.token;",
+                  "    pm.collectionVariables.set('customerToken', token);",
+                  "    ",
+                  "    // Decode JWT to extract userId",
+                  "    const base64Url = token.split('.')[1];",
+                  "    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');",
+                  "    const payload = JSON.parse(atob(base64));",
+                  "    if (payload.sub) pm.collectionVariables.set('customerUserId', payload.sub);",
+                  "  }",
+                  "  pm.test('Customer login successful', () => pm.response.to.have.status(200));",
+                  "} catch (e) {",
+                  "  pm.test('Login failed: ' + e.message, () => false);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Admin - List all users (ALLOWED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin can list users', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/users",
+            "description": "ADMIN can list all users"
+          }
+        },
+        {
+          "name": "Customer - List all users (FORBIDDEN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer cannot list users', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": "{{baseUrl}}/users",
+            "description": "CUSTOMER should get 403 Forbidden"
+          }
+        },
+        {
+          "name": "Professional - Create service (ALLOWED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Professional can create service', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{professionalToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Service\",\n  \"description\": \"Test\",\n  \"durationInMinutes\": 30,\n  \"price\": 25.0,\n  \"professional\": \"{{professionalId}}\",\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/services",
+            "description": "PROFESSIONAL can create their services"
+          }
+        },
+        {
+          "name": "Customer - Create service (FORBIDDEN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer cannot create service', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Service\",\n  \"description\": \"Test\",\n  \"durationInMinutes\": 30,\n  \"price\": 25.0,\n  \"professional\": \"{{professionalId}}\",\n  \"active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/services",
+            "description": "CUSTOMER should get 403 Forbidden"
+          }
+        },
+        {
+          "name": "Customer - Create appointment (ALLOWED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer can create appointment', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"2025-01-01T10:00:00Z\",\n  \"endTime\": \"2025-01-01T10:30:00Z\",\n  \"status\": \"BOOKED\",\n  \"customer\": \"{{customerId}}\",\n  \"professional\": \"{{professionalId}}\",\n  \"service\": \"{{serviceId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/appointments",
+            "description": "CUSTOMER can create appointments"
+          }
+        },
+        {
+          "name": "Admin - Delete payment (ALLOWED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin can delete payment', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/payments/{{paymentId}}",
+            "description": "Only ADMIN can delete payments (refund)"
+          }
+        },
+        {
+          "name": "Customer - Delete payment (FORBIDDEN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer cannot delete payment', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": "{{baseUrl}}/payments/{{paymentId}}",
+            "description": "CUSTOMER should get 403 Forbidden"
+          }
+        }
+      ]
+    }
+  ]
+}
