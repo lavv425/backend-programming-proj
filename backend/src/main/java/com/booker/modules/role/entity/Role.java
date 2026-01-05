@@ -4,9 +4,17 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents a user role in the system.
+ * Roles define what permissions and access levels a user has.
+ * Common roles include CUSTOMER, PROFESSIONAL, and ADMIN.
+ */
 @Entity
 @Table(name = "roles", uniqueConstraints = @UniqueConstraint(name = "uk_roles_role_name", columnNames = "role_name"), indexes = @Index(name = "idx_roles_role_name", columnList = "role_name"))
 public class Role {
+
+    protected Role() {
+    }
 
     public Role(String roleName) {
         this.roleName = roleName;
