@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import com.booker.modules.user.entity.User;
 
+/**
+ * Represents a customer user who books appointments with professionals.
+ * Extends the base User class with customer-specific information like
+ * phone number and loyalty points earned through bookings.
+ */
 @Entity
 @Table(name = "customers", uniqueConstraints = @UniqueConstraint(name = "uk_customers_phone", columnNames = "phone_number"), indexes = @Index(name = "idx_customers_phone", columnList = "phone_number"))
 public class Customer extends User {
