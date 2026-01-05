@@ -61,6 +61,9 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**", "/error").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
+                // Swagger/OpenAPI documentation - public access
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                
                 // Admin only - full system management
                 .requestMatchers("/roles/**").hasAuthority("SCOPE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority("SCOPE_ADMIN")
