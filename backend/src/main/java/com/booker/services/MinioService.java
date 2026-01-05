@@ -1,7 +1,6 @@
 package com.booker.services;
 
 import io.minio.*;
-import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,8 +8,6 @@ import com.booker.modules.log.service.LoggerService;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 /**

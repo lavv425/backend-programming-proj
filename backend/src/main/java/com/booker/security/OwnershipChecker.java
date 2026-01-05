@@ -21,19 +21,16 @@ public class OwnershipChecker {
 
     private final AppointmentRepository appointmentRepository;
     private final ReviewRepository reviewRepository;
-    private final PaymentRepository paymentRepository;
     private final ServiceRepository serviceRepository;
     private final LoggerService loggerService;
 
     public OwnershipChecker(
             AppointmentRepository appointmentRepository,
             ReviewRepository reviewRepository,
-            PaymentRepository paymentRepository,
             ServiceRepository serviceRepository,
             LoggerService loggerService) {
         this.appointmentRepository = appointmentRepository;
         this.reviewRepository = reviewRepository;
-        this.paymentRepository = paymentRepository;
         this.serviceRepository = serviceRepository;
         this.loggerService = loggerService;
     }
