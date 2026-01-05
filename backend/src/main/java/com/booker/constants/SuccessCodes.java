@@ -9,6 +9,7 @@ public class SuccessCodes {
 
     public static final String USER_REGISTERED = "USER_REGISTERED";
     public static final String USER_LOGGED_IN = "USER_LOGGED_IN";
+    public static final String USER_LOGGED_OUT = "USER_LOGGED_OUT";
     public static final String USER_UPDATED = "USER_UPDATED";
     public static final String USER_DELETED = "USER_DELETED";
 

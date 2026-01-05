@@ -15,10 +15,12 @@ import com.booker.modules.user.entity.User;
 import com.booker.modules.user.repository.UserRepository;
 import com.booker.services.EmailService;
 import com.booker.modules.log.service.LoggerService;
+import com.booker.security.service.TokenBlacklistService;
 
 import java.time.Instant;
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -43,6 +45,7 @@ public class AuthService {
     private final JwtProperties jwtProperties;
     private final EmailService emailService;
     private final LoggerService loggerService;
+    private final TokenBlacklistService tokenBlacklistService;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public AuthService(
@@ -51,13 +54,15 @@ public class AuthService {
             JwtEncoder jwtEncoder,
             JwtProperties jwtProperties,
             EmailService emailService,
-            LoggerService loggerService) {
+            LoggerService loggerService,
+            TokenBlacklistService tokenBlacklistService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jwtEncoder = jwtEncoder;
         this.jwtProperties = jwtProperties;
         this.emailService = emailService;
         this.loggerService = loggerService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     /**
@@ -165,6 +170,21 @@ public class AuthService {
             loggerService.error("User login failed: " + e.getMessage(), "AuthService");
             return new Response<>(false, null, ErrorCodes.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Logs out the current user by invalidating their JWT token.
+     * 
+     * Adds the current token to a blacklist, preventing it from being used
+     * for further authentication until it naturally expires.
+     * 
+     * @param authentication the authentication object containing the JWT token
+     * @return a response indicating successful logout
+     */
+    public Response<Void> logout(Authentication authentication) {
+        tokenBlacklistService.invalidateToken(authentication);
+        loggerService.success("User logged out", "AuthService");
+        return new Response<>(true, null, SuccessCodes.USER_LOGGED_OUT);
     }
 
 }

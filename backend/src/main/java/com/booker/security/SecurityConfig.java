@@ -1,5 +1,6 @@
 package com.booker.security;
 
+import com.booker.security.filter.TokenBlacklistFilter;
 import org.springframework.security.config.Customizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -25,12 +27,15 @@ public class SecurityConfig {
 
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
+    private final TokenBlacklistFilter tokenBlacklistFilter;
 
     public SecurityConfig(
             RestAuthenticationEntryPoint restAuthenticationEntryPoint,
-            RestAccessDeniedHandler restAccessDeniedHandler) {
+            RestAccessDeniedHandler restAccessDeniedHandler,
+            TokenBlacklistFilter tokenBlacklistFilter) {
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.restAccessDeniedHandler = restAccessDeniedHandler;
+        this.tokenBlacklistFilter = tokenBlacklistFilter;
     }
 
     /**
@@ -104,7 +109,10 @@ public class SecurityConfig {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .accessDeniedHandler(restAccessDeniedHandler)
                 .jwt(Customizer.withDefaults())
-            );
+            )
+            
+            // Check token blacklist after JWT authentication
+            .addFilterAfter(tokenBlacklistFilter, BearerTokenAuthenticationFilter.class);
 
         return http.build();
     }

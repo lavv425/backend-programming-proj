@@ -2,6 +2,7 @@ package com.booker.modules.auth.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.booker.constants.routes.Namespaces;
@@ -42,5 +43,15 @@ public class AuthController {
     @PostMapping(Routes.LOGIN)
     public ResponseEntity<Response<LoginResponse>> login(@Valid @RequestBody LoginRequest req) {
         return ResponseEntityBuilder.build(authService.login(req));
+    }
+
+    /**
+     * Logs out the current user.
+     * In a stateless JWT system, the client should discard the token.
+     * This endpoint confirms the logout action and invalidates the token server-side.
+     */
+    @PostMapping(Routes.LOGOUT)
+    public ResponseEntity<Response<Void>> logout(Authentication authentication) {
+        return ResponseEntityBuilder.build(authService.logout(authentication));
     }
 }
