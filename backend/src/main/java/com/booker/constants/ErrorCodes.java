@@ -1,5 +1,9 @@
 package com.booker.constants;
 
+/**
+ * Standard error codes used throughout the application for consistent error handling.
+ * These codes are mapped to HTTP status codes by ResponseEntityBuilder.
+ */
 public class ErrorCodes {
     public static final String EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
