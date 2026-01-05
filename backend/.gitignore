@@ -93,5 +93,3 @@ nb-configuration.xml
 *.log
 
 .env
-
-test
