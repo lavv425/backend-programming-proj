@@ -28,7 +28,7 @@ logging:
 security:
   jwt:
     issuer: ${JWT_ISSUER:${spring.application.name}}
-    # HS256 secret: almeno 32 caratteri (256-bit). Cambialo in prod.
+    # HS256 secret: almeno 32 caratteri (256-bit).
     secret: ${JWT_SECRET:change-me-please-change-me-please-32bytes}
     expiration-seconds: ${JWT_EXP_SECONDS:3600}
 
