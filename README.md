@@ -86,6 +86,7 @@ backend/src/main/java/com/booker/
 
 4. **The application will be available at:**
    - Backend API: http://localhost:8080/api/v1
+   - Swagger UI: http://localhost:8080/api/v1/swagger-ui.html
    - MinIO Console: http://localhost:9021
    - MailHog Web UI: http://localhost:8025
    - PostgreSQL: localhost:5432
@@ -148,6 +149,15 @@ The APIs follow a RESTful structure:
 ├── /reviews           # Review system
 └── /admin             # Administrative functions
 ```
+
+### Interactive API Documentation (Swagger UI)
+
+The project includes SpringDoc OpenAPI for interactive API documentation:
+
+- **Swagger UI**: http://localhost:8080/api/v1/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8080/api/v1/v3/api-docs
+
+Swagger UI provides an interactive interface to explore and test all available endpoints directly from your browser.
 
 ### Postman Collection
 
