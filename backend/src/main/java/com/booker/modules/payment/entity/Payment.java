@@ -5,6 +5,11 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 
+/**
+ * Represents a payment transaction for an appointment.
+ * Tracks the amount, currency, payment status, and the payment provider used.
+ * Currently supports Stripe as a payment provider.
+ */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "payments", indexes = @Index(name = "idx_appointment_email", columnList = "id"))
@@ -26,10 +31,11 @@ public class Payment {
     @Column(nullable = false)
     private String provider;
 
-    @Column(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_uuid", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_review_appointment"))
+    @Column(name = "appointment_uuid", nullable = false)
     private UUID appointment;
+
+    @Column(name = "stripe_payment_intent_id")
+    private String stripePaymentIntentId;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -86,5 +92,13 @@ public class Payment {
 
     public void setAppointment(UUID appointment) {
         this.appointment = appointment;
+    }
+
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
+    }
+
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+        this.stripePaymentIntentId = stripePaymentIntentId;
     }
 }

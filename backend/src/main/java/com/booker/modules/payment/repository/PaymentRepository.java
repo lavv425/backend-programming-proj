@@ -14,8 +14,8 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
     List<Payment> findByAmountGreaterThan(Double amount);
     List<Payment> findByAmountLessThan(Double amount);
     List<Payment> findByCurrency(String currency);
-    List<Payment> orderByAmountAsc();
-    List<Payment> orderByAmountDesc();
-    List<Payment> orderByCreatedAtAsc();
-    List<Payment> orderByCreatedAtDesc();
+    List<Payment> findAllByOrderByAmountAsc();
+    List<Payment> findAllByOrderByAmountDesc();
+    List<Payment> findAllByOrderByCreatedAtAsc();
+    List<Payment> findAllByOrderByCreatedAtDesc();
 }
